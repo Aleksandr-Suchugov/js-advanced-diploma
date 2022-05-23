@@ -1,0 +1,22 @@
+{
+  "name": "js-advanced-diploma",
+  "version": "1.0.0",
+  "description": "retro_game",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aleksandr-Suchugov/js-advanced-diploma.git"
+  },
+  "keywords": [
+    "diploma"
+  ],
+  "author": "Aleksandr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aleksandr-Suchugov/js-advanced-diploma/issues"
+  },
+  "homepage": "https://github.com/Aleksandr-Suchugov/js-advanced-diploma#readme"
+}
