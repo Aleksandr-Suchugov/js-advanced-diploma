@@ -4,7 +4,9 @@
   "description": "retro_game",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "check": "jest",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -18,5 +20,21 @@
   "bugs": {
     "url": "https://github.com/Aleksandr-Suchugov/js-advanced-diploma/issues"
   },
-  "homepage": "https://github.com/Aleksandr-Suchugov/js-advanced-diploma#readme"
+  "homepage": "https://github.com/Aleksandr-Suchugov/js-advanced-diploma#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "babel-jest": "^28.1.0",
+    "babel-loader": "^8.2.5",
+    "eslint": "^8.16.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "jest": "^28.1.0",
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "core-js": "^3.22.7"
+  }
 }
