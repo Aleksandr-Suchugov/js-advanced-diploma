@@ -18,11 +18,11 @@ export function calcTileType(index, boardSize) {
   if (index === tableSize - 1) {
     return 'bottom-right';
   }
-  if (index > tableSize - lineSize && index < tableSize - 1) {
+  if (index > tableSize * lineSize && index < tableSize - 1) {
     return 'bottom';
   }
   if (index % boardSize === 0) {
-    return 'lrft';
+    return 'left';
   }
   if ((index + 1) % boardSize === 0) {
     return "right";

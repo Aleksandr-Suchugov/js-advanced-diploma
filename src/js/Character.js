@@ -8,7 +8,7 @@ export default class Character {
     // TODO: throw error if user use "new Character()"
     // to test it
     if (new.target.name === 'Character') {
-      throw Error("Please don't use 'new Character()'");
+      throw Error('Please do not use "new Character()"');
     }
   }
 }

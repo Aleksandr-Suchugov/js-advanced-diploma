@@ -6,6 +6,7 @@ import propIcons from './Characters/propIcons';
 import GamePlay from './GamePlay';
 import GameState from './GameState';
 import cursors from './cursors';
+import allowedPositions from './allowedPositions'
 
 let selectedCharacterIdx = 0;
 let playerPositions = [];
@@ -269,47 +270,13 @@ export default class GameController {
     this.currentAction = 'player';
   }
 
-  allowedPositions(position, distance, boardSize) {
-    const allowedPositionsArray = [];
-    const row = Math.floor(position / boardSize);
-    const column = position % boardSize;
-  
-    for (let i = 1; i <= distance; i += 1) {
-      if ((column + i) < 8) {
-        allowedPositionsArray.push((row * 8) + (column + i));
-      }
-      if ((column - i) >= 0) {
-        allowedPositionsArray.push((row * 8) + (column - i));
-      }
-      if ((row + i) < 8) {
-        allowedPositionsArray.push(((row + i) * 8) + column);
-      }
-      if ((row - i) >= 0) {
-        allowedPositionsArray.push(((row - i) * 8) + column);
-      }
-      if ((row + i) < 8 && (column + i) < 8) {
-        allowedPositionsArray.push(((row + i) * 8) + (column + i));
-      }
-      if ((row - i) >= 0 && (column - i) >= 0) {
-        allowedPositionsArray.push(((row - i) * 8) + (column - i));
-      }
-      if ((row + i) < 8 && (column - i) >= 0) {
-        allowedPositionsArray.push(((row + i) * 8) + (column - i));
-      }
-      if ((row - i) >= 0 && (column + i) < 8) {
-        allowedPositionsArray.push(((row - i) * 8) + (column + i));
-      }
-    }
-    return allowedPositionsArray;
-  }
-
   computerStrategy() {
     if (this.currentAction === 'computer') {
       for (const computer of [...computerPositions]) {
         allowedDistanceAttack = this.selectedCharacter.character.distanceAttack;
         allowedPosition = computer.position;
         boardSize = this.gamePlay.boardSize;
-        const allowAttack = this.allowedPositions(allowedPosition, allowedDistanceAttack, boardSize);
+        const allowAttack = allowedPositions(allowedPosition, allowedDistanceAttack, boardSize);
         const target = this.computerAttack(allowAttack);
         if (target !== null) {
           this.computerAttacks(computer.character, target);
@@ -441,10 +408,10 @@ export default class GameController {
         allowedDistance = this.selectedCharacter.character.distance;
         boardSize = this.gamePlay.boardSize;
 
-        const allowPositions = this.allowedPositions(allowedPosition, allowedDistance, boardSize);
+        const allowPositions = allowedPositions(allowedPosition, allowedDistance, boardSize);
 
         allowedDistanceAttack = this.selectedCharacter.character.distanceAttack;
-        const allowAttack = this.allowedPositions(allowedPosition, allowedDistanceAttack, boardSize);
+        const allowAttack = allowedPositions(allowedPosition, allowedDistanceAttack, boardSize);
 
         if (this.getIndex(playerPositions) !== -1) {
           this.gamePlay.setCursor(cursors.pointer);
