@@ -6,8 +6,15 @@ import Undead from './characters/undead';
 import Vampire from './characters/vampire';
 
 export default class Team {
-  constructor(players) {
-    this.human = [Bowman, Swordsman, Magician];
-    this.computer = [Undead, Daemon, Vampire];
+  static getStartPlayerTeam() {
+    return [new Bowman(1), new Swordsman(1)];
+  }
+
+  static getPlayerTeam() {
+    return [Bowman, Swordsman, Magician];
+  }
+
+  static getComputerTeam() {
+    return [Daemon, Undead, Vampire];
   }
 }
