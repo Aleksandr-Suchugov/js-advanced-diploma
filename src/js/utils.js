@@ -25,7 +25,7 @@ export function calcTileType(index, boardSize) {
     return 'left';
   }
   if ((index + 1) % boardSize === 0) {
-    return "right";
+    return 'right';
   }
   return 'center';
 }

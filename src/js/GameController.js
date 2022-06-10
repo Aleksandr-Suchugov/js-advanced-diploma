@@ -2,11 +2,11 @@ import themes from './themes';
 import Team from './Team';
 import { generateTeam } from './generators';
 import PositionedCharacter from './PositionedCharacter';
-import propIcons from './Characters/propIcons';
+import propIcons from './characters/propIcons';
 import GamePlay from './GamePlay';
 import GameState from './GameState';
 import cursors from './cursors';
-import allowedPositions from './allowedPositions'
+import allowedPositions from './allowedPositions';
 
 let selectedCharacterIdx = 0;
 let playerPositions = [];
@@ -28,7 +28,7 @@ export default class GameController {
     this.currentTheme = themes.prairie;
     this.blockedBoard = false;
     this.playerTeam = [];
-    this.computerTeam = [];
+    this.compTeam = [];
     this.idx = 0;
   }
 
@@ -52,29 +52,23 @@ export default class GameController {
     this.currentAction = 'player';
     if (this.level === 1) {
       this.playerTeam = Team.getStartPlayerTeam();
-      this.computerTeam = generateTeam(Team.getComputerTeam(), 1, 2);
-      this.addCharacterPosition(this.playerTeam, this.computerTeam);
+      this.compTeam = generateTeam(Team.getComputerTeam(), 1, 2);
+      this.addCharacterPosition(this.playerTeam, this.compTeam);
     } else if (this.level === 2) {
       this.currentTheme = themes.desert;
       this.playerTeam = generateTeam(Team.getPlayerTeam(), 1, 1);
-      this.computerTeam = generateTeam(
-        Team.getComputerTeam(), 2, (this.playerTeam.length + playerPositions.length),
-      );
-      this.addCharacterPosition(this.playerTeam, this.computerTeam);
+      this.compTeam = generateTeam(Team.getComputerTeam(), 2, (this.playerTeam.length + playerPositions.length));
+      this.addCharacterPosition(this.playerTeam, this.compTeam);
     } else if (this.level === 3) {
       this.currentTheme = themes.arctic;
       this.playerTeam = generateTeam(Team.getPlayerTeam(), 2, 2);
-      this.computerTeam = generateTeam(
-        Team.getComputerTeam(), 3, (this.playerTeam.length + playerPositions.length),
-      );
-      this.addCharacterPosition(this.playerTeam, this.computerTeam);
+      this.compTeam = generateTeam(Team.getComputerTeam(), 3, (this.playerTeam.length + playerPositions.length));
+      this.addCharacterPosition(this.playerTeam, this.compTeam);
     } else if (this.level === 4) {
       this.currentTheme = themes.mountain;
       this.playerTeam = generateTeam(Team.getPlayerTeam(), 3, 2);
-      this.computerTeam = generateTeam(
-        Team.getComputerTeam(), 4, (this.playerTeam.length + playerPositions.length),
-      );
-      this.addCharacterPosition(this.playerTeam, this.computerTeam);
+      this.compTeam = generateTeam(Team.getComputerTeam(), 4, (this.playerTeam.length + playerPositions.length));
+      this.addCharacterPosition(this.playerTeam, this.compTeam);
     } else {
       this.blockedBoard = true;
       GamePlay.showMessage(`Your score ${this.point}. Best score: ${this.maxPoints()}.`);
@@ -114,8 +108,8 @@ export default class GameController {
       maxPoint,
       level: this.level,
       currentTheme: this.currentTheme,
-      playerPositions: playerPositions,
-      computerPositions: computerPositions,
+      playerPositions,
+      computerPositions,
     };
     this.stateService.save(GameState.from(currentGameState));
     GamePlay.showMessage('Game Saved!');
@@ -292,22 +286,22 @@ export default class GameController {
   }
 
   computerMove(itemComputer) {
-    const currentComputerCharacter = itemComputer;
-    const itemComputerDistance = itemComputer.character.distance;
+    const currentCompCharacter = itemComputer;
+    const itemCompDistance = itemComputer.character.distance;
     let tempPRow;
     let tempPCOlumn;
     let stepRow;
     let stepColumn;
     let Steps;
-    const itemComputerRow = this.positionRow(currentComputerCharacter.position);
-    const itemComputerColumn = this.positionColumn(currentComputerCharacter.position);
+    const itemCompRow = this.positionRow(currentCompCharacter.position);
+    const itemCompColumn = this.positionColumn(currentCompCharacter.position);
     let nearPlayer = {};
 
     for (const itemPlayer of [...playerPositions]) {
       const itemPlayerRow = this.positionRow(itemPlayer.position);
       const itemPlayerColumn = this.positionColumn(itemPlayer.position);
-      stepRow = itemComputerRow - itemPlayerRow;
-      stepColumn = itemComputerColumn - itemPlayerColumn;
+      stepRow = itemCompRow - itemPlayerRow;
+      stepColumn = itemCompColumn - itemPlayerColumn;
       Steps = Math.abs(stepRow) + Math.abs(stepColumn);
 
       if (nearPlayer.steps === undefined || Steps < nearPlayer.steps) {
@@ -321,54 +315,54 @@ export default class GameController {
       }
     }
     if (Math.abs(nearPlayer.steprow) === Math.abs(nearPlayer.stepcolumn)) {
-      if (Math.abs(nearPlayer.steprow) > itemComputerDistance) {
-        tempPRow = (itemComputerRow - (itemComputerDistance * Math.sign(nearPlayer.steprow)));
-        tempPCOlumn = (itemComputerColumn - (itemComputerDistance * Math.sign(nearPlayer.stepcolumn)));
+      if (Math.abs(nearPlayer.steprow) > itemCompDistance) {
+        tempPRow = (itemCompRow - (itemCompDistance * Math.sign(nearPlayer.steprow)));
+        tempPCOlumn = (itemCompColumn - (itemCompDistance * Math.sign(nearPlayer.stepcolumn)));
 
-        currentComputerCharacter.position = this.rowColumnToIndex(tempPRow, tempPCOlumn);
+        currentCompCharacter.position = this.rowColumnToIndex(tempPRow, tempPCOlumn);
       } else {
-        tempPRow = (itemComputerRow - (nearPlayer.steprow - (1 * Math.sign(nearPlayer.steprow))));
-        tempPCOlumn = (itemComputerColumn - (nearPlayer.stepcolumn - (1 * Math.sign(nearPlayer.steprow))));
+        tempPRow = (itemCompRow - (nearPlayer.steprow - (1 * Math.sign(nearPlayer.steprow))));
+        tempPCOlumn = (itemCompColumn - (nearPlayer.stepcolumn - (1 * Math.sign(nearPlayer.steprow))));
 
-        currentComputerCharacter.position = this.rowColumnToIndex(tempPRow, tempPCOlumn);
+        currentCompCharacter.position = this.rowColumnToIndex(tempPRow, tempPCOlumn);
       }
     } else if (nearPlayer.stepcolumn === 0) {
-      if (Math.abs(nearPlayer.steprow) > itemComputerDistance) {
-        tempPRow = (itemComputerRow - (itemComputerDistance * Math.sign(nearPlayer.steprow)));
+      if (Math.abs(nearPlayer.steprow) > itemCompDistance) {
+        tempPRow = (itemCompRow - (itemCompDistance * Math.sign(nearPlayer.steprow)));
 
-        currentComputerCharacter.position = this.rowColumnToIndex(tempPRow, (itemComputerColumn));
+        currentCompCharacter.position = this.rowColumnToIndex(tempPRow, (itemCompColumn));
       } else {
-        tempPRow = (itemComputerRow - (nearPlayer.steprow - (1 * Math.sign(nearPlayer.steprow))));
+        tempPRow = (itemCompRow - (nearPlayer.steprow - (1 * Math.sign(nearPlayer.steprow))));
 
-        currentComputerCharacter.position = this.rowColumnToIndex(tempPRow, (itemComputerColumn));
+        currentCompCharacter.position = this.rowColumnToIndex(tempPRow, (itemCompColumn));
       }
     } else if (nearPlayer.steprow === 0) {
-      if (Math.abs(nearPlayer.stepcolumn) > itemComputerDistance) {
-        tempPCOlumn = (itemComputerColumn - (itemComputerDistance * Math.sign(nearPlayer.stepcolumn)));
+      if (Math.abs(nearPlayer.stepcolumn) > itemCompDistance) {
+        tempPCOlumn = (itemCompColumn - (itemCompDistance * Math.sign(nearPlayer.stepcolumn)));
 
-        currentComputerCharacter.position = this.rowColumnToIndex((itemComputerRow), tempPCOlumn);
+        currentCompCharacter.position = this.rowColumnToIndex((itemCompRow), tempPCOlumn);
       } else {
         const tempFormul = (nearPlayer.stepcolumn - (1 * Math.sign(nearPlayer.stepcolumn)));
-        tempPCOlumn = (itemComputerColumn - tempFormul);
+        tempPCOlumn = (itemCompColumn - tempFormul);
 
-        currentComputerCharacter.position = this.rowColumnToIndex((itemComputerRow), tempPCOlumn);
+        currentCompCharacter.position = this.rowColumnToIndex((itemCompRow), tempPCOlumn);
       }
     } else if (Math.abs(nearPlayer.steprow) > Math.abs(nearPlayer.stepcolumn)) {
-      if (Math.abs(nearPlayer.steprow) > itemComputerDistance) {
-        tempPRow = (itemComputerRow - (itemComputerDistance * Math.sign(nearPlayer.steprow)));
+      if (Math.abs(nearPlayer.steprow) > itemCompDistance) {
+        tempPRow = (itemCompRow - (itemCompDistance * Math.sign(nearPlayer.steprow)));
 
-        currentComputerCharacter.position = this.rowColumnToIndex(tempPRow, (itemComputerColumn));
+        currentCompCharacter.position = this.rowColumnToIndex(tempPRow, (itemCompColumn));
       } else {
-        tempPRow = (itemComputerRow - (nearPlayer.steprow));
+        tempPRow = (itemCompRow - (nearPlayer.steprow));
 
-        currentComputerCharacter.position = this.rowColumnToIndex(tempPRow, (itemComputerColumn));
+        currentCompCharacter.position = this.rowColumnToIndex(tempPRow, (itemCompColumn));
       }
-    } else if (Math.abs(nearPlayer.stepcolumn) > itemComputerDistance) {
-      tempPCOlumn = (itemComputerColumn - (itemComputerDistance * Math.sign(nearPlayer.stepcolumn)));
+    } else if (Math.abs(nearPlayer.stepcolumn) > itemCompDistance) {
+      tempPCOlumn = (itemCompColumn - (itemCompDistance * Math.sign(nearPlayer.stepcolumn)));
 
-      currentComputerCharacter.position = this.rowColumnToIndex((itemComputerRow), tempPCOlumn);
+      currentCompCharacter.position = this.rowColumnToIndex((itemCompRow), tempPCOlumn);
     } else {
-      currentComputerCharacter.position = this.rowColumnToIndex((itemComputerRow), (itemComputerColumn));
+      currentCompCharacter.position = this.rowColumnToIndex((itemCompRow), (itemCompColumn));
     }
   }
 

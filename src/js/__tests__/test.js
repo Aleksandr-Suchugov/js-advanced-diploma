@@ -36,17 +36,16 @@ test.each([
   [57, 8, 'bottom-left'],
   [63, 8, 'bottom-right'],
   [9, 8, 'center'],
-  [0, 9, 'top-left'],])(('should return tile type'), (index, boardSize, result) => {
+  [0, 9, 'top-left']])(('should return tile type'), (index, boardSize, result) => {
   const received = calcTileType(index, boardSize);
   expect(received).toBe(result);
-});  
-    
-  test('returns allowed positions', () => {
-    const received = allowedPositions(2, 2, 8);
-    const expected = [3, 1, 10, 11, 9, 4, 0, 18, 20, 16];
-    expect(received).toEqual(expected);
-  });
-  
+});
+
+test('returns allowed positions', () => {
+  const received = allowedPositions(2, 2, 8);
+  const expected = [3, 1, 10, 11, 9, 4, 0, 18, 20, 16];
+  expect(received).toEqual(expected);
+});
 
 jest.mock('../gameState_test/GameState');
 beforeEach(() => {

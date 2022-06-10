@@ -1,11 +1,11 @@
 export default class Themes {
   static level = 0;
-  
+
   static _themes = [
-    {prairie: 'prairie'},
-    {desert: 'desert'},
-    {arctic: 'arctic'},
-    {mountain: 'mountain'},
+    { prairie: 'prairie' },
+    { desert: 'desert' },
+    { arctic: 'arctic' },
+    { mountain: 'mountain' },
   ];
 
   static get themes() {
