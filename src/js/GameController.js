@@ -57,7 +57,23 @@ export default class GameController {
       for (let i = 0; i < computersTeam.length; i += 1) {
         computerPositions.push(new PositionedCharacter(computersTeam[i], 0));
       }
-    }
+    };
+    const getPositions = (length) => {
+      const position = { player: [], computer: [] };
+      let random;
+      const randomPosition = (column = 0) => (Math.floor(Math.random() * 8) * 8) + ((Math.floor(Math.random() * 2) + column));
+      for (let i = 0; i < length; i += 1) {
+        do {
+          random = randomPosition();
+        } while (position.player.includes(random));
+        position.player.push(random);
+        do {
+          random = randomPosition(6);
+        } while (position.computer.includes(random));
+        position.computer.push(random);
+      }
+      return position;
+    };
     if (this.level === 1) {
       this.playerTeam = Team.getStartPlayerTeam();
       this.compTeam = generateTeam(Team.getComputerTeam(), 1, 2);
@@ -82,7 +98,7 @@ export default class GameController {
       GamePlay.showMessage(`Your score ${this.point}. Best score: ${this.maxPoints()}.`);
       return;
     }
-    const characterPositions = this.getPositions(playerPositions.length);
+    const characterPositions = getPositions(playerPositions.length);
     for (let i = 0; i < playerPositions.length; i += 1) {
       playerPositions[i].position = characterPositions.player[i];
       computerPositions[i].position = characterPositions.computer[i];
@@ -197,39 +213,20 @@ export default class GameController {
     return maxPoint;
   }
 
-  getPositions(length) {
-    const position = { player: [], computer: [] };
-    let random;
-    const randomPosition = (column = 0) => (Math.floor(Math.random() * 8) * 8) + ((Math.floor(Math.random() * 2) + column));
-    for (let i = 0; i < length; i += 1) {
-      do {
-        random = randomPosition();
-      } while (position.player.includes(random));
-      position.player.push(random);
-
-      do {
-        random = randomPosition(6);
-      } while (position.computer.includes(random));
-      position.computer.push(random);
-    }
-    return position;
-  }
-
-  levelUp() {
-    for (const item of playerPositions) {
-      const current = item.character;
-      const attackAndDefenceLevelUp = (attackBefore, health) => Math.floor(Math.max(attackBefore, attackBefore * (1.8 - health / 100)));
-      current.level += 1;
-      current.attack = attackAndDefenceLevelUp(current.attack, current.health);
-      current.defence = attackAndDefenceLevelUp(current.defence, current.health);
-      current.health = (current.health + 80) < 100 ? current.health + 80 : 100;
-    }
-  }
-
   async characterAttacker(character, target) {
     const targetedCharacter = target.character;
     let damage = Math.max(character.attack - targetedCharacter.defence, character.attack * 0.1);
     damage = Math.floor(damage);
+    const levelUp = () => {
+      for (const item of playerPositions) {
+        const current = item.character;
+        const attackAndDefenceLevelUp = (attackBefore, health) => Math.floor(Math.max(attackBefore, attackBefore * (1.8 - health / 100)));
+        current.level += 1;
+        current.attack = attackAndDefenceLevelUp(current.attack, current.health);
+        current.defence = attackAndDefenceLevelUp(current.defence, current.health);
+        current.health = (current.health + 80) < 100 ? current.health + 80 : 100;
+      }
+    };
     await this.gamePlay.showDamage(target.position, damage);
     targetedCharacter.health -= damage;
     this.currentAction = this.currentAction === 'computer' ? 'player' : 'computer';
@@ -244,7 +241,7 @@ export default class GameController {
         for (const item of playerPositions) {
           this.point += item.character.health;
         }
-        this.levelUp();
+        levelUp();
         this.level += 1;
         this.nextLevel();
       }
@@ -265,7 +262,7 @@ export default class GameController {
         }
       }
       return null;
-    }
+    };
     if (this.currentAction === 'computer') {
       for (const computer of [...computerPositions]) {
         allowedDistanceAttack = this.selectedCharacter.character.distanceAttack;
