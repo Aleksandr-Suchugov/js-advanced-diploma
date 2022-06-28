@@ -50,60 +50,35 @@ export default class GameController {
 
   nextLevel() {
     this.currentAction = 'player';
-    const addCharacterPosition = (playersTeam, computersTeam) => {
-      for (let i = 0; i < playersTeam.length; i += 1) {
-        playerPositions.push(new PositionedCharacter(playersTeam[i], 0));
-      }
-      for (let i = 0; i < computersTeam.length; i += 1) {
-        computerPositions.push(new PositionedCharacter(computersTeam[i], 0));
-      }
-    };
-    const getPositions = (length) => {
-      const position = { player: [], computer: [] };
-      let random;
-      const randomPosition = (column = 0) => (Math.floor(Math.random() * 8) * 8) + ((Math.floor(Math.random() * 2) + column));
-      for (let i = 0; i < length; i += 1) {
-        do {
-          random = randomPosition();
-        } while (position.player.includes(random));
-        position.player.push(random);
-        do {
-          random = randomPosition(6);
-        } while (position.computer.includes(random));
-        position.computer.push(random);
-      }
-      return position;
-    };
     if (this.level === 1) {
       this.playerTeam = Team.getStartPlayerTeam();
       this.compTeam = generateTeam(Team.getComputerTeam(), 1, 2);
-      addCharacterPosition(this.playerTeam, this.compTeam);
+      GameController.addCharacterPosition(this.playerTeam, this.compTeam);
     } else if (this.level === 2) {
       this.currentTheme = themes.desert;
       this.playerTeam = generateTeam(Team.getPlayerTeam(), 1, 1);
       this.compTeam = generateTeam(Team.getComputerTeam(), 2, (this.playerTeam.length + playerPositions.length));
-      addCharacterPosition(this.playerTeam, this.compTeam);
+      GameController.addCharacterPosition(this.playerTeam, this.compTeam);
     } else if (this.level === 3) {
       this.currentTheme = themes.arctic;
       this.playerTeam = generateTeam(Team.getPlayerTeam(), 2, 2);
       this.compTeam = generateTeam(Team.getComputerTeam(), 3, (this.playerTeam.length + playerPositions.length));
-      addCharacterPosition(this.playerTeam, this.compTeam);
+      GameController.addCharacterPosition(this.playerTeam, this.compTeam);
     } else if (this.level === 4) {
       this.currentTheme = themes.mountain;
       this.playerTeam = generateTeam(Team.getPlayerTeam(), 3, 2);
       this.compTeam = generateTeam(Team.getComputerTeam(), 4, (this.playerTeam.length + playerPositions.length));
-      addCharacterPosition(this.playerTeam, this.compTeam);
+      GameController.addCharacterPosition(this.playerTeam, this.compTeam);
     } else {
       this.blockedBoard = true;
       GamePlay.showMessage(`Your score ${this.point}. Best score: ${this.maxPoints()}.`);
       return;
     }
-    const characterPositions = getPositions(playerPositions.length);
+    const characterPositions = GameController.getPositions(playerPositions.length);
     for (let i = 0; i < playerPositions.length; i += 1) {
       playerPositions[i].position = characterPositions.player[i];
       computerPositions[i].position = characterPositions.computer[i];
     }
-
     this.gamePlay.drawUi(this.currentTheme);
     this.gamePlay.redrawPositions([...playerPositions, ...computerPositions]);
   }
@@ -157,6 +132,40 @@ export default class GameController {
       GamePlay.showError('Loading failed!');
       this.newGame();
     }
+  }
+
+  static rowColumnToIndex(row, column) {
+    return row * 8 + column;
+  }
+
+  static addCharacterPosition(playersTeam, computersTeam) {
+    for (let i = 0; i < playersTeam.length; i += 1) {
+      playerPositions.push(new PositionedCharacter(playersTeam[i], 0));
+    }
+    for (let i = 0; i < computersTeam.length; i += 1) {
+      computerPositions.push(new PositionedCharacter(computersTeam[i], 0));
+    }
+  }
+
+  static getPositions(length) {
+    const position = { player: [], computer: [] };
+    let random;
+    const randomPosition = (column = 0) => (Math.floor(Math.random() * 8) * 8) + ((Math.floor(Math.random() * 2) + column));
+    for (let i = 0; i < length; i += 1) {
+      do {
+        random = randomPosition();
+      } while (position.player.includes(random));
+      position.player.push(random);
+      do {
+        random = randomPosition(6);
+      } while (position.computer.includes(random));
+      position.computer.push(random);
+    }
+    return position;
+  }
+
+  static attackAndDefenceLevelUp(attackBefore, health) {
+    return Math.floor(Math.max(attackBefore, attackBefore * (1.8 - health / 100)));
   }
 
   async onCellClick(index) {
@@ -220,10 +229,9 @@ export default class GameController {
     const levelUp = () => {
       for (const item of playerPositions) {
         const current = item.character;
-        const attackAndDefenceLevelUp = (attackBefore, health) => Math.floor(Math.max(attackBefore, attackBefore * (1.8 - health / 100)));
         current.level += 1;
-        current.attack = attackAndDefenceLevelUp(current.attack, current.health);
-        current.defence = attackAndDefenceLevelUp(current.defence, current.health);
+        current.attack = GameController.attackAndDefenceLevelUp(current.attack, current.health);
+        current.defence = GameController.attackAndDefenceLevelUp(current.defence, current.health);
         current.health = (current.health + 80) < 100 ? current.health + 80 : 100;
       }
     };
@@ -255,15 +263,15 @@ export default class GameController {
   }
 
   computerStrategy() {
-    const computerAttack = (allowAttack) => {
-      for (const itemPlayer of [...playerPositions]) {
-        if (allowAttack.includes(itemPlayer.position)) {
-          return itemPlayer;
-        }
-      }
-      return null;
-    };
     if (this.currentAction === 'computer') {
+      const computerAttack = (allowAttack) => {
+        for (const itemPlayer of [...playerPositions]) {
+          if (allowAttack.includes(itemPlayer.position)) {
+            return itemPlayer;
+          }
+        }
+        return null;
+      };
       for (const computer of [...computerPositions]) {
         allowedDistanceAttack = this.selectedCharacter.character.distanceAttack;
         allowedPosition = computer.position;
@@ -294,8 +302,6 @@ export default class GameController {
     const itemCompRow = this.positionRow(currentCompCharacter.position);
     const itemCompColumn = this.positionColumn(currentCompCharacter.position);
     let nearPlayer = {};
-    const rowColumnToIndex = (row, column) => row * 8 + column;
-
     for (const itemPlayer of [...playerPositions]) {
       const itemPlayerRow = this.positionRow(itemPlayer.position);
       const itemPlayerColumn = this.positionColumn(itemPlayer.position);
@@ -318,50 +324,50 @@ export default class GameController {
         tempPRow = (itemCompRow - (itemCompDistance * Math.sign(nearPlayer.steprow)));
         tempPCOlumn = (itemCompColumn - (itemCompDistance * Math.sign(nearPlayer.stepcolumn)));
 
-        currentCompCharacter.position = rowColumnToIndex(tempPRow, tempPCOlumn);
+        currentCompCharacter.position = GameController.rowColumnToIndex(tempPRow, tempPCOlumn);
       } else {
         tempPRow = (itemCompRow - (nearPlayer.steprow - (1 * Math.sign(nearPlayer.steprow))));
         tempPCOlumn = (itemCompColumn - (nearPlayer.stepcolumn - (1 * Math.sign(nearPlayer.steprow))));
 
-        currentCompCharacter.position = rowColumnToIndex(tempPRow, tempPCOlumn);
+        currentCompCharacter.position = GameController.rowColumnToIndex(tempPRow, tempPCOlumn);
       }
     } else if (nearPlayer.stepcolumn === 0) {
       if (Math.abs(nearPlayer.steprow) > itemCompDistance) {
         tempPRow = (itemCompRow - (itemCompDistance * Math.sign(nearPlayer.steprow)));
 
-        currentCompCharacter.position = rowColumnToIndex(tempPRow, itemCompColumn);
+        currentCompCharacter.position = GameController.rowColumnToIndex(tempPRow, itemCompColumn);
       } else {
         tempPRow = (itemCompRow - (nearPlayer.steprow - (1 * Math.sign(nearPlayer.steprow))));
 
-        currentCompCharacter.position = rowColumnToIndex(tempPRow, itemCompColumn);
+        currentCompCharacter.position = GameController.rowColumnToIndex(tempPRow, itemCompColumn);
       }
     } else if (nearPlayer.steprow === 0) {
       if (Math.abs(nearPlayer.stepcolumn) > itemCompDistance) {
         tempPCOlumn = (itemCompColumn - (itemCompDistance * Math.sign(nearPlayer.stepcolumn)));
 
-        currentCompCharacter.position = rowColumnToIndex(itemCompRow, tempPCOlumn);
+        currentCompCharacter.position = GameController.rowColumnToIndex(itemCompRow, tempPCOlumn);
       } else {
         const tempFormul = (nearPlayer.stepcolumn - (1 * Math.sign(nearPlayer.stepcolumn)));
         tempPCOlumn = (itemCompColumn - tempFormul);
 
-        currentCompCharacter.position = rowColumnToIndex(itemCompRow, tempPCOlumn);
+        currentCompCharacter.position = GameController.rowColumnToIndex(itemCompRow, tempPCOlumn);
       }
     } else if (Math.abs(nearPlayer.steprow) > Math.abs(nearPlayer.stepcolumn)) {
       if (Math.abs(nearPlayer.steprow) > itemCompDistance) {
         tempPRow = (itemCompRow - (itemCompDistance * Math.sign(nearPlayer.steprow)));
 
-        currentCompCharacter.position = rowColumnToIndex(tempPRow, itemCompColumn);
+        currentCompCharacter.position = GameController.rowColumnToIndex(tempPRow, itemCompColumn);
       } else {
         tempPRow = (itemCompRow - (nearPlayer.steprow));
 
-        currentCompCharacter.position = rowColumnToIndex(tempPRow, itemCompColumn);
+        currentCompCharacter.position = GameController.rowColumnToIndex(tempPRow, itemCompColumn);
       }
     } else if (Math.abs(nearPlayer.stepcolumn) > itemCompDistance) {
       tempPCOlumn = (itemCompColumn - (itemCompDistance * Math.sign(nearPlayer.stepcolumn)));
 
-      currentCompCharacter.position = rowColumnToIndex(itemCompRow, tempPCOlumn);
+      currentCompCharacter.position = GameController.rowColumnToIndex(itemCompRow, tempPCOlumn);
     } else {
-      currentCompCharacter.position = rowColumnToIndex(itemCompRow, itemCompColumn);
+      currentCompCharacter.position = GameController.rowColumnToIndex(itemCompRow, itemCompColumn);
     }
   }
 

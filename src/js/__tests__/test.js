@@ -32,10 +32,9 @@ test.each([
   [7, 8, 'top-right'],
   [8, 8, 'left'],
   [15, 8, 'right'],
-  [56, 8, 'left'],
-  [57, 8, 'bottom-left'],
+  [56, 8, 'bottom-left'],
   [63, 8, 'bottom-right'],
-  [9, 8, 'center'],
+  [20, 8, 'center'],
   [0, 9, 'top-left']])(('should return tile type'), (index, boardSize, result) => {
   const received = calcTileType(index, boardSize);
   expect(received).toBe(result);

@@ -12,13 +12,13 @@ export function calcTileType(index, boardSize) {
   if (index > 0 && index < lineSize) {
     return 'top';
   }
-  if (index === tableSize - lineSize) {
+  if (index === tableSize - 1 - lineSize) {
     return 'bottom-left';
   }
   if (index === tableSize - 1) {
     return 'bottom-right';
   }
-  if (index > tableSize * lineSize && index < tableSize - 1) {
+  if (index > (tableSize - 1 - lineSize) && index < tableSize - 1) {
     return 'bottom';
   }
   if (index % boardSize === 0) {
